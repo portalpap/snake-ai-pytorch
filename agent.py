@@ -22,7 +22,7 @@ class Agent:
         self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
-    def get_state(self, game):
+    def get_state(self, game: SnakeGameAI):
         head = game.snake[0]
         point_l = Point(head.x - 20, head.y)
         point_r = Point(head.x + 20, head.y)

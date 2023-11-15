@@ -8,13 +8,7 @@ from abc import ABC, abstractmethod
 import pygame
 from pygame.surface import Surface
 
-from constants import (
-    CLOCK_WISE_ARRAY,
-    DARK_GREEN,
-    LIGHT_GREEN,
-    RED,
-    Direction,
-)
+from constants import CLOCK_WISE_ARRAY, DARK_GREEN, LIGHT_GREEN, RED, Direction, Point
 
 
 class GameObject(ABC):
@@ -28,7 +22,7 @@ class GameObject(ABC):
 class Food(GameObject):
     """Food class."""
 
-    position: tuple[int, int]
+    position: Point
 
     def __init__(self, screen_width: int, screen_height: int, size: int) -> None:
         self.screen_width = screen_width
@@ -36,22 +30,15 @@ class Food(GameObject):
         self.size = size
         self.randomize_position()
 
-    @property
-    def x(self) -> int:
-        """Return the x coordinate of the food."""
-        return self.position[0]
-
-    @property
-    def y(self) -> int:
-        """Return the y coordinate of the food."""
-        return self.position[1]
-
-    def randomize_position(self) -> None:
+    def randomize_position(self, exclude: tuple[Point] = ()):
         """Randomize the position of the food."""
-        self.position = (
-            random.randrange(0, self.screen_width - self.size, self.size),
-            random.randrange(0, self.screen_height - self.size, self.size),
-        )
+        while True:
+            self.position = (
+                random.randrange(0, self.screen_width - self.size, self.size),
+                random.randrange(0, self.screen_height - self.size, self.size),
+            )
+            if self.position not in exclude:
+                break
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the food on the screen."""
@@ -63,7 +50,7 @@ class Snake(GameObject):
     """Snake class."""
 
     def __init__(self, x: int, y: int, size: int) -> None:
-        self.body_segments: list[tuple[int, int]] = [(x, y)]
+        self.body_segments: list[Point] = [Point(x, y)]
         self.direction: Direction = Direction.RIGHT
         self.size = size
 
@@ -106,7 +93,7 @@ class Snake(GameObject):
         elif self.direction == Direction.LEFT:
             x -= self.size
 
-        self.body_segments.insert(0, (x, y))
+        self.body_segments.insert(0, Point(x, y))
         self.body_segments.pop()
 
     def check_collision_with_boundaries(self, width: int, height: int) -> bool:

@@ -1,10 +1,11 @@
 """Constants for the game Snake."""
 
+from collections import namedtuple
 from enum import Enum
 
 # Game Config
 SCREEN_WIDTH, SCREEN_HEIGHT = 600, 400
-TICK_RATE = 15
+TICK_RATE = 40
 SHOULD_RESTART_ON_GAME_OVER = False
 MOVES_PER_SEGMENT = 100
 CELL_SIZE = 20
@@ -36,3 +37,4 @@ class Action(Enum):
 # Misc
 
 CLOCK_WISE_ARRAY = (Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP)
+Point = namedtuple("Point", "x, y")

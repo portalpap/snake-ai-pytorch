@@ -19,6 +19,29 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 
+class Food:
+    position: Point
+
+    def __init__(self, screen_width: int, screen_height: int, size: int) -> None:
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.size = size
+        self.randomize_position()
+
+    def randomize_position(self, snake: list[Point] = ()) -> None:
+        """Randomize the position of the food."""
+        x = random.randrange(0, self.screen_width - self.size, self.size)
+        y = random.randrange(0, self.screen_height - self.size, self.size)
+        self.position = Point(x, y)
+        if self.position in snake:
+            self.randomize_position(snake)
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the food on the screen."""
+        rect = pygame.Rect(self.position, (self.size, self.size))
+        pygame.draw.rect(screen, RED, rect)
+
+
 class SnakeGameAI:
     def __init__(self, w=640, h=480):
         self.w = w
@@ -41,16 +64,8 @@ class SnakeGameAI:
         ]
 
         self.score = 0
-        self.food = None
-        self._place_food()
+        self.food = Food(self.w, self.h, CELL_SIZE)
         self.frame_iteration = 0
-
-    def _place_food(self):
-        x = random.randint(0, (self.w - CELL_SIZE) // CELL_SIZE) * CELL_SIZE
-        y = random.randint(0, (self.h - CELL_SIZE) // CELL_SIZE) * CELL_SIZE
-        self.food = Point(x, y)
-        if self.food in self.snake:
-            self._place_food()
 
     def play_step(self, action):
         self.frame_iteration += 1
@@ -73,10 +88,10 @@ class SnakeGameAI:
             return reward, game_over, self.score
 
         # 4. place new food or just move
-        if self.head == self.food:
+        if self.head == self.food.position:
             self.score += 1
             reward = 10
-            self._place_food()
+            self.food.randomize_position(self.snake)
         else:
             self.snake.pop()
 
@@ -114,11 +129,14 @@ class SnakeGameAI:
                 self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12)
             )
 
-        pygame.draw.rect(
-            self.display,
-            RED,
-            pygame.Rect(self.food.x, self.food.y, CELL_SIZE, CELL_SIZE),
-        )
+        # pygame.draw.rect(
+        #     self.display,
+        #     RED,
+        #     pygame.Rect(
+        #         self.food.position.x, self.food.position.y, CELL_SIZE, CELL_SIZE
+        #     ),
+        # )
+        self.food.draw(self.display)
 
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])

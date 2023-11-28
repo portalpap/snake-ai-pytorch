@@ -4,7 +4,7 @@ from enum import Enum
 import numpy as np
 import pygame
 
-from constants import CELL_SIZE, TICK_RATE, Direction, Point
+from constants import CELL_SIZE, TICK_RATE, Action, Direction, Point
 
 pygame.init()
 font = pygame.font.Font("arial.ttf", 25)
@@ -20,6 +20,8 @@ BLACK = (0, 0, 0)
 
 
 class Food:
+    """Food class."""
+
     position: Point
 
     def __init__(self, screen_width: int, screen_height: int, size: int) -> None:
@@ -67,7 +69,11 @@ class SnakeGameAI:
         self.food = Food(self.w, self.h, CELL_SIZE)
         self.frame_iteration = 0
 
-    def play_step(self, action):
+    def play_action(self, action: Action):
+        """
+        Play an action and return the game's state.
+        Used for training the AI model.
+        """
         self.frame_iteration += 1
         # 1. collect user input
         for event in pygame.event.get():
@@ -129,20 +135,13 @@ class SnakeGameAI:
                 self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12)
             )
 
-        # pygame.draw.rect(
-        #     self.display,
-        #     RED,
-        #     pygame.Rect(
-        #         self.food.position.x, self.food.position.y, CELL_SIZE, CELL_SIZE
-        #     ),
-        # )
         self.food.draw(self.display)
 
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
         pygame.display.flip()
 
-    def _move(self, action):
+    def _move(self, action: Action):
         # [straight, right, left]
 
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
@@ -161,13 +160,14 @@ class SnakeGameAI:
 
         x = self.head.x
         y = self.head.y
-        if self.direction == Direction.RIGHT:
-            x += CELL_SIZE
-        elif self.direction == Direction.LEFT:
-            x -= CELL_SIZE
-        elif self.direction == Direction.DOWN:
-            y += CELL_SIZE
-        elif self.direction == Direction.UP:
-            y -= CELL_SIZE
+        match self.direction:
+            case Direction.RIGHT:
+                x += CELL_SIZE
+            case Direction.LEFT:
+                x -= CELL_SIZE
+            case Direction.DOWN:
+                y += CELL_SIZE
+            case Direction.UP:
+                y -= CELL_SIZE
 
         self.head = Point(x, y)

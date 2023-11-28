@@ -18,6 +18,9 @@ class GameObject(ABC):
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the object on the screen."""
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.__dict__})"
+
 
 class Food(GameObject):
     """Food class."""
@@ -56,7 +59,7 @@ class Snake(GameObject):
 
     @property
     def head(self) -> tuple[int, int]:
-        """Return the head of the snake."""
+        """Return the first index of the snake. (AKA the head)"""
         return self.body_segments[0]
 
     def change_direction(self, new_direction: Direction) -> None:
@@ -83,27 +86,29 @@ class Snake(GameObject):
 
     def move(self) -> None:
         """Move the snake."""
-        x, y = self.body_segments[0]
-        if self.direction == Direction.UP:
-            y -= self.size
-        elif self.direction == Direction.RIGHT:
-            x += self.size
-        elif self.direction == Direction.DOWN:
-            y += self.size
-        elif self.direction == Direction.LEFT:
-            x -= self.size
+        x, y = self.head
+
+        match self.direction:
+            case Direction.UP:
+                y -= self.size
+            case Direction.RIGHT:
+                x += self.size
+            case Direction.DOWN:
+                y += self.size
+            case Direction.LEFT:
+                x -= self.size
 
         self.body_segments.insert(0, Point(x, y))
         self.body_segments.pop()
 
     def check_collision_with_boundaries(self, width: int, height: int) -> bool:
         """Check if the snake has collided with the boundaries."""
-        x, y = self.body_segments[0]
+        x, y = self.head
         return x >= width or x < 0 or y >= height or y < 0
 
     def check_collision_with_self(self) -> bool:
         """Check if the snake has collided with itself."""
-        return self.body_segments[0] in self.body_segments[1:]
+        return self.head in self.body_segments[1:]
 
     def check_collision_with_food(self, food: Food) -> bool:
         """Check if the snake has eaten the food."""
@@ -115,13 +120,21 @@ class Snake(GameObject):
 
     def draw(self, screen: Surface) -> None:
         """Draw the snake on the screen."""
-        for _, segment in enumerate(self.body_segments):
-            full_rect = pygame.Rect(segment, (self.size, self.size))
-            small_size = int(self.size * 0.8)
-            offset = int((self.size - small_size) / 2)
-            smaller_rect = pygame.Rect(
+        small_size = int(self.size * 0.8)
+        offset = int((self.size - small_size) / 2)
+
+        full_rects = [
+            pygame.Rect(segment, (self.size, self.size))
+            for segment in self.body_segments
+        ]
+        smaller_rects = [
+            pygame.Rect(
                 (segment[0] + offset, segment[1] + offset), (small_size, small_size)
             )
+            for segment in self.body_segments
+        ]
+
+        for full_rect, smaller_rect in zip(full_rects, smaller_rects):
             pygame.draw.rect(screen, DARK_GREEN, full_rect)
             pygame.draw.rect(screen, LIGHT_GREEN, smaller_rect)
 

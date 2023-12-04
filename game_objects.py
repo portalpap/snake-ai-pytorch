@@ -33,15 +33,13 @@ class Food(GameObject):
         self.size = size
         self.randomize_position()
 
-    def randomize_position(self, exclude: tuple[Point] = ()):
+    def randomize_position(self, snake: list[Point] = ()) -> None:
         """Randomize the position of the food."""
-        while True:
-            self.position = (
-                random.randrange(0, self.screen_width - self.size, self.size),
-                random.randrange(0, self.screen_height - self.size, self.size),
-            )
-            if self.position not in exclude:
-                break
+        x = random.randrange(0, self.screen_width - self.size, self.size)
+        y = random.randrange(0, self.screen_height - self.size, self.size)
+        self.position = Point(x, y)
+        if self.position in snake:
+            self.randomize_position(snake)
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the food on the screen."""

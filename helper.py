@@ -1,10 +1,12 @@
+"""Helper functions for the training process"""
 import matplotlib.pyplot as plt
 from IPython import display
 
 plt.ion()
 
 
-def plot(scores, mean_scores):
+def plot(scores: list[float], mean_scores: list[float]):
+    """Plots information about the training process"""
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()

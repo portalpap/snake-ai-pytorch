@@ -1,10 +1,11 @@
-import random
-from enum import Enum
+"""Snake Game"""
+import sys
 
 import numpy as np
 import pygame
 
 from constants import CELL_SIZE, TICK_RATE, Action, Direction, Point
+from game_objects import Food, Snake
 
 pygame.init()
 font = pygame.font.Font("arial.ttf", 25)
@@ -19,32 +20,16 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 
-class Food:
-    """Food class."""
-
-    position: Point
-
-    def __init__(self, screen_width: int, screen_height: int, size: int) -> None:
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.size = size
-        self.randomize_position()
-
-    def randomize_position(self, snake: list[Point] = ()) -> None:
-        """Randomize the position of the food."""
-        x = random.randrange(0, self.screen_width - self.size, self.size)
-        y = random.randrange(0, self.screen_height - self.size, self.size)
-        self.position = Point(x, y)
-        if self.position in snake:
-            self.randomize_position(snake)
-
-    def draw(self, screen: pygame.Surface) -> None:
-        """Draw the food on the screen."""
-        rect = pygame.Rect(self.position, (self.size, self.size))
-        pygame.draw.rect(screen, RED, rect)
-
-
 class SnakeGameAI:
+    """Version of Snake game for AI to play"""
+
+    direction: Direction
+    head: Point
+    snake: list[Point]
+    score: int
+    food: Food
+    frame_iteration: int
+
     def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
@@ -55,6 +40,9 @@ class SnakeGameAI:
         self.reset()
 
     def reset(self):
+        """
+        Reset the game's state.
+        """
         # init game state
         self.direction = Direction.RIGHT
 
@@ -79,7 +67,7 @@ class SnakeGameAI:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                sys.exit()
 
         # 2. move
         self._move(action)  # update the head
@@ -108,6 +96,7 @@ class SnakeGameAI:
         return reward, game_over, self.score
 
     def is_collision(self, pt=None):
+        """Check if the snake collides with the boundary or itself"""
         if pt is None:
             pt = self.head
         # hits boundary
@@ -125,6 +114,7 @@ class SnakeGameAI:
         return False
 
     def _update_ui(self):
+        """Updates the game's display"""
         self.display.fill(BLACK)
 
         for pt in self.snake:
@@ -142,6 +132,7 @@ class SnakeGameAI:
         pygame.display.flip()
 
     def _move(self, action: Action):
+        """Move the snake"""
         # [straight, right, left]
 
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]

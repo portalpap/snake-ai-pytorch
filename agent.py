@@ -14,6 +14,8 @@ LR = 0.001
 
 
 class Agent:
+    """Agent class to play snake game"""
+
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
@@ -23,6 +25,7 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game: SnakeGameAI):
+        """Return the state of the game"""
         head = game.snake[0]
         point_l = Point(head.x - 20, head.y)
         point_r = Point(head.x + 20, head.y)
@@ -65,11 +68,13 @@ class Agent:
         return np.array(state, dtype=int)
 
     def remember(self, state, action, reward, next_state, done):
+        """Remember the state, action, reward, next_state, done"""
         self.memory.append(
             (state, action, reward, next_state, done)
-        )  # popleft if MAX_MEMORY is reached
+        )  # unshift if MAX_MEMORY is reached
 
     def train_long_memory(self):
+        """Train the model with the remembered states"""
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE)  # list of tuples
         else:
@@ -81,9 +86,11 @@ class Agent:
         #    self.trainer.train_step(state, action, reward, next_state, done)
 
     def train_short_memory(self, state, action, reward, next_state, done):
+        """Train the model with the current state"""
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
+        """Return the action to take"""
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
@@ -100,6 +107,7 @@ class Agent:
 
 
 def train():
+    """Train the agent"""
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -139,6 +147,7 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
+
             plot(plot_scores, plot_mean_scores)
 
 
